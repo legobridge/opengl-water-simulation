@@ -197,7 +197,7 @@ int main()
 
     Shader modelShader("../src/shader/model.vs", "../src/shader/model.fs");
 
-    Model ourModel("../model/nanosuit/nanosuit.obj");
+    Model ourModel("../model/nanosuit/nanosuit.obj", modelShader);
 
 	// Initialize the Scene object
 	// myScene = new Scene();
@@ -222,7 +222,7 @@ int main()
         model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f));
         model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
         modelShader.setMat4("model", model);
-        ourModel.Draw(modelShader);
+        ourModel.draw();
 		// ****** End Rendering Commands ******
 		
 		// Check for events, then swap buffers
@@ -230,6 +230,8 @@ int main()
         glfwSwapBuffers(window);
     }
 
-    glfwTerminate();
+	// Deallocation of Resources
+	glfwDestroyWindow(window);
+	glfwTerminate();
     return 0;
 }

@@ -27,12 +27,15 @@ public:
 	std::vector<Texture> textures_loaded;
 	std::vector<Mesh> meshes;
 	std::string directory;
+	Shader shader;
     bool gammaCorrection;
 
-	Model(std::string const &path, bool gamma = false);
+	Model(std::string const &path, Shader s, bool gamma = false);
 
-	void Draw(Shader shader);
-    
+	void draw();
+
+	void drawMesh(Mesh mesh);
+   
 private:
 
 	void loadModel(std::string const &path);

@@ -2,15 +2,19 @@
 
 using namespace std;
 
-Model::Model(string const &path, bool gamma) : gammaCorrection(gamma)
+Model::Model(string const &path, Shader s, bool gamma)
+	: shader(s)
+	, gammaCorrection(gamma)
 {
 	loadModel(path);
 }
 
-void Model::Draw(Shader shader)
+void Model::draw()
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
-		meshes[i].Draw(shader);
+	{
+		drawMesh(meshes[i]);
+	}
 }
 
 void Model::loadModel(string const &path)
@@ -84,16 +88,16 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 	}
 	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-	// 1. diffuse maps
+	// Diffuse maps
 	vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-	// 2. specular maps
+	// Specular maps
 	vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 	textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-	// 3. normal maps
+	// Normal maps
 	std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
 	textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-	// 4. height maps
+	// Height maps
 	std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_height");
 	textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
@@ -169,4 +173,39 @@ unsigned int Model::TextureFromFile(const char *path, const string &directory, b
 	}
 
 	return textureID;
+}
+
+void Model::drawMesh(Mesh mesh)
+{
+	vector<Vertex> vertices = mesh.vertices;
+	vector<unsigned int> indices = mesh.indices;
+	vector<Texture> textures = mesh.textures;
+
+	unsigned int diffuseNr = 1;
+	unsigned int specularNr = 1;
+	unsigned int normalNr = 1;
+	unsigned int heightNr = 1;
+	for (unsigned int i = 0; i < textures.size(); i++)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		std::string number;
+		std::string name = textures[i].type;
+		if (name == "texture_diffuse")
+			number = std::to_string(diffuseNr++);
+		else if (name == "texture_specular")
+			number = std::to_string(specularNr++);
+		else if (name == "texture_normal")
+			number = std::to_string(normalNr++);
+		else if (name == "texture_height")
+			number = std::to_string(heightNr++);
+
+		glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
+		glBindTexture(GL_TEXTURE_2D, textures[i].id);
+	}
+
+	glBindVertexArray(mesh.VAO);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+
+	glActiveTexture(GL_TEXTURE0);
 }

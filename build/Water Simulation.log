@@ -1,3 +1,6 @@
-﻿  camera.cpp
+﻿  model.cpp
+  mesh.cpp
+  main.cpp
+  Generating Code...
   Water Simulation.vcxproj -> C:\Users\sweat\source\repos\Water Simulation\build\Water Simulation.exe
   Water Simulation.vcxproj -> C:\Users\sweat\source\repos\Water Simulation\build\Water Simulation.pdb (Partial PDB)
