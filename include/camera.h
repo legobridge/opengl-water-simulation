@@ -42,7 +42,7 @@ public:
 	glm::mat4 GetViewMatrix();
 
     // Processes input received from any keyboard-like input system
-	void ProcessKeyboard(Camera_Movement direction, float deltaTime);
+	void ProcessKeyboard(Camera_Movement direction);
 
     // Processes input received from a mouse input system
 	void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);

@@ -10,7 +10,7 @@ Camera::Camera()
 	worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	yaw = -90.0f;
 	pitch = 0.0f;
-	movementSpeed = 2.5f;
+	movementSpeed = 0.1f;
 	mouseSensitivity = 0.1f;
 	zoom = 45.0f;
 	updateCameraVectors();
@@ -23,17 +23,24 @@ glm::mat4 Camera::GetViewMatrix()
 }
 
 // Processes input received from any keyboard-like input system
-void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime)
+void Camera::ProcessKeyboard(Camera_Movement direction)
 {
-	float velocity = movementSpeed * deltaTime;
 	if (direction == FORWARD)
-		position += front * velocity;
+	{
+		position += front * movementSpeed;
+	}
 	if (direction == BACKWARD)
-		position -= front * velocity;
+	{
+		position -= front * movementSpeed;
+	}
 	if (direction == LEFT)
-		position -= right * velocity;
+	{
+		position -= right * movementSpeed;
+	}
 	if (direction == RIGHT)
-		position += right * velocity;
+	{
+		position += right * movementSpeed;
+	}
 }
 
 // Processes input received from a mouse input system
