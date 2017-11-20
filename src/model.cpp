@@ -9,14 +9,6 @@ Model::Model(string const &path, Shader s, bool gamma)
 	loadModel(path);
 }
 
-void Model::draw()
-{
-	for (unsigned int i = 0; i < meshes.size(); i++)
-	{
-		drawMesh(meshes[i]);
-	}
-}
-
 void Model::loadModel(string const &path)
 {
 	Assimp::Importer importer;
@@ -175,7 +167,15 @@ unsigned int Model::TextureFromFile(const char *path, const string &directory, b
 	return textureID;
 }
 
-void Model::drawMesh(Mesh mesh)
+void Model::draw(unsigned int amount)
+{
+	for (unsigned int i = 0; i < meshes.size(); i++)
+	{
+		drawMesh(meshes[i], amount);
+	}
+}
+
+void Model::drawMesh(Mesh mesh, unsigned int amount)
 {
 	vector<Vertex> vertices = mesh.vertices;
 	vector<unsigned int> indices = mesh.indices;
@@ -204,7 +204,7 @@ void Model::drawMesh(Mesh mesh)
 	}
 
 	glBindVertexArray(mesh.VAO);
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, amount);
 	glBindVertexArray(0);
 
 	glActiveTexture(GL_TEXTURE0);

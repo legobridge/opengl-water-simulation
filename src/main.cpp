@@ -14,6 +14,7 @@
 #include "shader.h"
 #include "camera.h"
 #include "model.h"
+#include "object.h"
 
 using namespace std;
 
@@ -199,6 +200,48 @@ int main()
 
     Model ourModel("../model/nanosuit/nanosuit.obj", modelShader);
 
+	vector<Object> nanosuits;
+	for (int i = -100; i <= 100; i++)
+	{
+		glm::mat4 model = glm::mat4(1.0f);
+		glm::vec3 position = glm::vec3(10.0f * i, 0.0f, 0.0f);
+		Object nanosuit(&ourModel, model, position);
+		nanosuits.push_back(nanosuit);
+	}
+
+	vector<glm::mat4> modelMatrices(nanosuits.size());
+
+	for (size_t i = 0; i < nanosuits.size(); i++)
+	{
+		modelMatrices[i] = glm::translate(glm::mat4(1.0f), nanosuits[i].position) * nanosuits[i].model;
+	}
+
+	unsigned int buffer;
+	glGenBuffers(1, &buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	glBufferData(GL_ARRAY_BUFFER, nanosuits.size() * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
+
+	for (size_t i = 0; i < ourModel.meshes.size(); i++)
+	{
+		unsigned int VAO = ourModel.meshes[i].VAO;
+		glBindVertexArray(VAO);
+
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
+		glEnableVertexAttribArray(5);
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
+		glEnableVertexAttribArray(6);
+		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+
+		glVertexAttribDivisor(3, 1);
+		glVertexAttribDivisor(4, 1);
+		glVertexAttribDivisor(5, 1);
+		glVertexAttribDivisor(6, 1);
+	}
+
+
 	// Initialize the Scene object
 	// myScene = new Scene();
 
@@ -207,22 +250,19 @@ int main()
     {
 		// ******** Rendering Commands ********
 		// Clear buffers
-        glClearColor(0.05f, 0.15f, 0.35f, 1.0f);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         modelShader.use();
 
-        glm::mat4 projection = glm::perspective(glm::radians(camera.zoom), (float)SCR_W / (float)SCR_H, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.zoom), (float)SCR_W / (float)SCR_H, 0.1f, 1000.0f);
         glm::mat4 view = camera.GetViewMatrix();
         modelShader.setMat4("projection", projection);
         modelShader.setMat4("view", view);
 
 		// Draw objects
-        glm::mat4 model;
-        model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f));
-        model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-        modelShader.setMat4("model", model);
-        ourModel.draw();
+		ourModel.draw(nanosuits.size());
+
 		// ****** End Rendering Commands ******
 		
 		// Check for events, then swap buffers

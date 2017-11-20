@@ -32,9 +32,9 @@ public:
 
 	Model(std::string const &path, Shader s, bool gamma = false);
 
-	void draw();
+	void draw(unsigned int amount);
 
-	void drawMesh(Mesh mesh);
+	void drawMesh(Mesh mesh, unsigned int amount);
    
 private:
 

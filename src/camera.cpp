@@ -5,12 +5,12 @@ using namespace std;
 // Constructor
 Camera::Camera()
 {
-	position = glm::vec3(0.0f, 0.0f, 5.0f);
+	position = glm::vec3(0.0f, 0.0f, 50.0f);
 	front = glm::vec3(0.0f, 0.0f, -1.0f);
 	worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	yaw = -90.0f;
 	pitch = 0.0f;
-	movementSpeed = 0.1f;
+	movementSpeed = 1.0f;
 	mouseSensitivity = 0.1f;
 	zoom = 45.0f;
 	updateCameraVectors();
