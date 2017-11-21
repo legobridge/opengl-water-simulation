@@ -1,11 +1,13 @@
-#include "camera.h"
 #include <iostream>
+#include <algorithm>
+#include "camera.h"
+
 using namespace std;
 
 // Constructor
 Camera::Camera()
 {
-	position = glm::vec3(0.0f, 0.0f, 50.0f);
+	position = glm::vec3(0.0f, 10.0f, 50.0f);
 	front = glm::vec3(0.0f, 0.0f, -1.0f);
 	worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	yaw = -90.0f;
@@ -22,8 +24,8 @@ glm::mat4 Camera::GetViewMatrix()
 	return glm::lookAt(position, position + front, up);
 }
 
-// Processes input received from any keyboard-like input system
-void Camera::ProcessKeyboard(Camera_Movement direction)
+// Processes strafing movement
+void Camera::ProcessKeyboardStrafe(Camera_Movement direction)
 {
 	if (direction == FORWARD)
 	{
@@ -41,6 +43,12 @@ void Camera::ProcessKeyboard(Camera_Movement direction)
 	{
 		position += right * movementSpeed;
 	}
+}
+
+// Change camera movement speed
+void Camera::changeCameraSpeed(float increment)
+{
+	movementSpeed = max(0.0f, movementSpeed + increment);
 }
 
 // Processes input received from a mouse input system

@@ -11,10 +11,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-#include "shader.h"
 #include "camera.h"
-#include "model.h"
-#include "object.h"
+#include "scene.h"
 
 using namespace std;
 
@@ -28,7 +26,7 @@ const unsigned int SCR_MAX_H = 768;
 const char* WINDOW_TITLE = "Water Simulation";
 
 // Camera
-Camera camera;
+Camera* camera;
 float lastX = SCR_W / 2.0f;
 float lastY = SCR_H / 2.0f;
 bool firstMouse = true;
@@ -63,19 +61,19 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 	if (key == GLFW_KEY_W && (action == GLFW_REPEAT || action == GLFW_PRESS))
 	{
-		camera.ProcessKeyboard(FORWARD);
+		camera->ProcessKeyboardStrafe(FORWARD);
 	}
 	if (key == GLFW_KEY_S && (action == GLFW_REPEAT || action == GLFW_PRESS))
 	{
-		camera.ProcessKeyboard(BACKWARD);
+		camera->ProcessKeyboardStrafe(BACKWARD);
 	}
 	if (key == GLFW_KEY_A && (action == GLFW_REPEAT || action == GLFW_PRESS))
 	{
-		camera.ProcessKeyboard(LEFT);
+		camera->ProcessKeyboardStrafe(LEFT);
 	}
 	if (key == GLFW_KEY_D && (action == GLFW_REPEAT || action == GLFW_PRESS))
 	{
-		camera.ProcessKeyboard(RIGHT);
+		camera->ProcessKeyboardStrafe(RIGHT);
 	}
 	/*if (key == GLFW_KEY_LEFT && (action == GLFW_REPEAT || action == GLFW_PRESS))
 	{
@@ -85,6 +83,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 		myScene->speedUpTime();
 	}*/
+	if (key == GLFW_KEY_UP && (action == GLFW_REPEAT || action == GLFW_PRESS))
+	{
+		camera->changeCameraSpeed(0.5f);
+	}
+	if (key == GLFW_KEY_DOWN && (action == GLFW_REPEAT || action == GLFW_PRESS))
+	{
+		camera->changeCameraSpeed(-0.5f);
+	}
 }
 
 // **************************************
@@ -106,7 +112,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 	lastX = (float)xpos;
 	lastY = (float)ypos;
-	camera.ProcessMouseMovement(xoffset, yoffset);
+	camera->ProcessMouseMovement(xoffset, yoffset);
 }
 
 // **************************************
@@ -116,7 +122,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 // **************************************
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	camera.ProcessMouseScroll((float)yoffset);
+	camera->ProcessMouseScroll((float)yoffset);
 }
 
 // OpenGL Initialization
@@ -176,8 +182,12 @@ bool initializeOpenGL()
 	glEnable(GL_DEPTH_TEST);
 
 	// Enable backface culling
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
+	/*glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);*/
+
+	// Enable alpha blending
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
 
 	// Viewport Settings
 	glViewport(0, 0, SCR_W, SCR_H);
@@ -196,75 +206,16 @@ int main()
 		return -1;
 	}
 
-    Shader modelShader("../src/shader/model.vs", "../src/shader/model.fs");
-
-    Model ourModel("../model/nanosuit/nanosuit.obj", modelShader);
-
-	vector<Object> nanosuits;
-	for (int i = -100; i <= 100; i++)
-	{
-		glm::mat4 model = glm::mat4(1.0f);
-		glm::vec3 position = glm::vec3(10.0f * i, 0.0f, 0.0f);
-		Object nanosuit(&ourModel, model, position);
-		nanosuits.push_back(nanosuit);
-	}
-
-	vector<glm::mat4> modelMatrices(nanosuits.size());
-
-	for (size_t i = 0; i < nanosuits.size(); i++)
-	{
-		modelMatrices[i] = glm::translate(glm::mat4(1.0f), nanosuits[i].position) * nanosuits[i].model;
-	}
-
-	unsigned int buffer;
-	glGenBuffers(1, &buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, nanosuits.size() * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
-
-	for (size_t i = 0; i < ourModel.meshes.size(); i++)
-	{
-		unsigned int VAO = ourModel.meshes[i].VAO;
-		glBindVertexArray(VAO);
-
-		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
-		glEnableVertexAttribArray(4);
-		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
-		glEnableVertexAttribArray(5);
-		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
-		glEnableVertexAttribArray(6);
-		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
-
-		glVertexAttribDivisor(3, 1);
-		glVertexAttribDivisor(4, 1);
-		glVertexAttribDivisor(5, 1);
-		glVertexAttribDivisor(6, 1);
-	}
-
 
 	// Initialize the Scene object
-	// myScene = new Scene();
+	Scene myScene;
+
+	camera = &(myScene.camera);
 
 	// **************** Render Loop ****************
     while (!glfwWindowShouldClose(window))
     {
-		// ******** Rendering Commands ********
-		// Clear buffers
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        modelShader.use();
-
-        glm::mat4 projection = glm::perspective(glm::radians(camera.zoom), (float)SCR_W / (float)SCR_H, 0.1f, 1000.0f);
-        glm::mat4 view = camera.GetViewMatrix();
-        modelShader.setMat4("projection", projection);
-        modelShader.setMat4("view", view);
-
-		// Draw objects
-		ourModel.draw(nanosuits.size());
-
-		// ****** End Rendering Commands ******
-		
+		myScene.drawObjects();
 		// Check for events, then swap buffers
 		glfwPollEvents();
         glfwSwapBuffers(window);

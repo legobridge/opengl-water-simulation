@@ -41,8 +41,11 @@ public:
     // Returns the view matrix calculated using Euler Angles and the LookAt Matrix
 	glm::mat4 GetViewMatrix();
 
-    // Processes input received from any keyboard-like input system
-	void ProcessKeyboard(Camera_Movement direction);
+    // Processes strafing movement
+	void ProcessKeyboardStrafe(Camera_Movement direction);
+
+	// Change camera movement speed
+	void changeCameraSpeed(float increment);
 
     // Processes input received from a mouse input system
 	void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);
