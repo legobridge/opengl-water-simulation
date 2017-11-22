@@ -12,7 +12,7 @@ Camera::Camera()
 	worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	yaw = -90.0f;
 	pitch = 0.0f;
-	movementSpeed = 1.0f;
+	movementSpeed = 0.6f;
 	mouseSensitivity = 0.1f;
 	zoom = 45.0f;
 	updateCameraVectors();

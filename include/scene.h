@@ -20,28 +20,41 @@ public:
 	const unsigned int SCR_H = 768;
 
 	// World dimensions
-	const float WORLD_W = 300.0f;
-	const float WORLD_H = 100.0f;
-	const float WORLD_D = 200.0f;
+	const float WORLD_W = 30.0f;
+	const float WORLD_H = 20.0f;
+	const float WORLD_D = 20.0f;
 
-	// In-Program time
-	float time;
-
-	// Timescale measure for day-night cycle
+	// In-Program timekeeping variables
+	float time; 
+	float prevTime;
 	float timescale;
 
 	// Time pause state
 	bool paused;
 
-	// Color map
-	std::map<std::string, glm::vec3> colors;
+	Camera camera;
+
+	Shader modelShader;
+
+	Model terrainModel;
+	Model treeModel;
+
+
+	std::vector<Object> terrainObjects;
+	std::vector<Object> treeObjects;
+
+	std::vector<std::vector<bool> > occupied;
 
 	// Constructor
 	Scene();
 
-	void setupGrassObjects();
+	// Generic setup function
+	void Scene::setupObjects(std::vector<Object> objects, Model model);
 
+	// Prepare terrain object for instantiation
+	void setupTerrainObject();
 
+	// Prepare tree objects for instantiation
 	void setupTreeObjects();
 
 	// Toggle time (on/off)
@@ -53,17 +66,8 @@ public:
 	// Speed up time
 	void speedUpTime();
 
-	Camera camera;
-
-	Shader modelShader;
-
-	Model grassModel;
-
-	std::vector<Object> grassObjects;
-
-	Model treeModel;
-
-	std::vector<Object> treeObjects;
+	// Update current time
+	void updateTime();
 
 	// Call rendering functions for all the pre-computed objects
 	void drawObjects();

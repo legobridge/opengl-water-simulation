@@ -35,7 +35,7 @@ bool firstMouse = true;
 GLFWwindow* window;
 
 // Pointer to the scene object
-// Scene* myScene;
+Scene* myScene;
 
 // Callback Function for Framebuffer Resizing
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -50,6 +50,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 // - S key moves camera backward
 // - A key makes camera strafe left
 // - D key makes camera strafe right
+// - P key toggles the day/night cycle
 // - LEFT ARROW key slows down the day/night cycle
 // - RIGHT ARROW  key speeds up the day/night cycle
 // ************************************************
@@ -75,21 +76,25 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 		camera->ProcessKeyboardStrafe(RIGHT);
 	}
-	/*if (key == GLFW_KEY_LEFT && (action == GLFW_REPEAT || action == GLFW_PRESS))
+	if (key == GLFW_KEY_P && (action == GLFW_REPEAT || action == GLFW_PRESS))
+	{
+		myScene->toggleTime();
+	}
+	if (key == GLFW_KEY_LEFT && (action == GLFW_REPEAT || action == GLFW_PRESS))
 	{
 		myScene->slowDownTime();
 	}
 	if (key == GLFW_KEY_RIGHT && (action == GLFW_REPEAT || action == GLFW_PRESS))
 	{
 		myScene->speedUpTime();
-	}*/
+	}
 	if (key == GLFW_KEY_UP && (action == GLFW_REPEAT || action == GLFW_PRESS))
 	{
-		camera->changeCameraSpeed(0.5f);
+		camera->changeCameraSpeed(0.2f);
 	}
 	if (key == GLFW_KEY_DOWN && (action == GLFW_REPEAT || action == GLFW_PRESS))
 	{
-		camera->changeCameraSpeed(-0.5f);
+		camera->changeCameraSpeed(-0.2f);
 	}
 }
 
@@ -138,8 +143,8 @@ bool initializeOpenGL()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	// Window (default: 768p fullscreen) and context creationglfwGetPrimaryMonitor()
-	window = glfwCreateWindow(SCR_W, SCR_H, WINDOW_TITLE, NULL, NULL);
+	// Window (default: 768p fullscreen) and context creation
+	window = glfwCreateWindow(SCR_W, SCR_H, WINDOW_TITLE, glfwGetPrimaryMonitor(), NULL);
 	if (!window)
 	{
 		cout << "Window or context creation failed" << endl;
@@ -208,14 +213,14 @@ int main()
 
 
 	// Initialize the Scene object
-	Scene myScene;
+	myScene = new Scene();
 
-	camera = &(myScene.camera);
+	camera = &(myScene->camera);
 
 	// **************** Render Loop ****************
     while (!glfwWindowShouldClose(window))
     {
-		myScene.drawObjects();
+		myScene->drawObjects();
 		// Check for events, then swap buffers
 		glfwPollEvents();
         glfwSwapBuffers(window);
