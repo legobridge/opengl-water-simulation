@@ -33,8 +33,8 @@ public:
 	// Time pause state
 	bool paused;
 
-	// Time when water levels were last updated
-	float lastWaterUpdateTime;
+	// Current height of water level to be computed
+	int k;
 
 	Camera camera;
 
@@ -43,11 +43,12 @@ public:
 	Model terrainModel;
 	Model waterModel;
 	Model treeModel;
-
+	Model grassModel;
 
 	std::vector<Object> terrainObjects;
 	std::vector<Object> treeObjects;
 	std::vector<Object> waterObjects;
+	std::vector<Object> grassObjects;
 
 	std::vector<std::vector<std::vector<bool> > > terrainExistence;
 	std::vector<std::vector<std::vector<int> > > waterLevels;
@@ -56,7 +57,7 @@ public:
 	Scene();
 
 	// Generic setup function
-	void Scene::setupObjects(std::vector<Object> objects, Model model);
+	void setupObjects(std::vector<Object> objects, Model model);
 
 	// Read in the heightmap and setup terrain heights
 	void setupTerrainHeights();
@@ -67,8 +68,17 @@ public:
 	// Prepare tree objects for instantiation
 	void setupTreeObjects();
 
+	// Prepare tree objects for instantiation
+	void setupGrassObjects();
+
 	// Prepare water blocks for instantiation
 	void setupWaterObjects();
+
+	// Add water at the top
+	void addWater();
+
+	// Refresh scales of water blocks to match waterLevels
+	void refreshLevels();
 
 	// Update water levels
 	void updateWaterObjects();

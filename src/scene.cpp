@@ -9,6 +9,7 @@ Scene::Scene()
 	: modelShader("../src/shader/model.vs", "../src/shader/model.fs")
 	, terrainModel("../model/terrain/terrain.obj", modelShader)
 	, treeModel("../model/tree/tree.obj", modelShader)
+	, grassModel("../model/grass/grass.obj", modelShader)
 	, waterModel("../model/water/water.obj", modelShader)
 {
 	time = -30.0f;
@@ -18,7 +19,7 @@ Scene::Scene()
 
 	paused = true;
 
-	lastWaterUpdateTime = 0.0f;
+	k = 1;
 
 	waterLevels.resize((size_t)WORLD_D);
 	terrainExistence.resize((size_t)WORLD_D);
@@ -36,6 +37,7 @@ Scene::Scene()
 
 	setupTerrainObject();
 	setupTreeObjects();
+	setupGrassObjects();
 	setupWaterObjects();
 }
 
@@ -117,19 +119,49 @@ void Scene::setupTerrainObject()
 
 void Scene::setupTreeObjects()
 {
-	for (int i = 0; i < 1; i++)
+	Object tree1(&treeModel, glm::vec3(9.0f, 8.0f, -7.0f), glm::vec3(2.0f, 2.0f, 2.0f));
+	treeObjects.push_back(tree1);
+	Object tree2(&treeModel, glm::vec3(13.0f, 7.0f, -4.0f), glm::vec3(3.0f, 3.0f, 3.0f));
+	treeObjects.push_back(tree2);
+	Object tree3(&treeModel, glm::vec3(-12.0f, 7.0f, -4.0f), glm::vec3(2.5f, 2.5f, 2.5f));
+	treeObjects.push_back(tree3);
+	Object tree4(&treeModel, glm::vec3(-8.0f, 9.0f, -8.0f), glm::vec3(3.5f, 3.5f, 3.5f));
+	treeObjects.push_back(tree4);
+	setupObjects(treeObjects, treeModel);
+}
+
+void Scene::setupGrassObjects()
+{
+	for (int i = (int)WORLD_D - 1; i >= 0; i--)
 	{
-		for (int j = 0; j < 1; j++)
+		for (int j = 1; j < 10; j++)
 		{
-			for (int k = 0; k < 1; k++)
+			for (int k = 1; k <= 10; k++)
 			{
-				glm::vec3 position = glm::vec3(0.0f, 10.0f, 0.0f);
-				Object tree(&treeModel, position);
-				treeObjects.push_back(tree);
+				if (terrainExistence[i][j][k - 1] && !terrainExistence[i][j][k])
+				{
+					glm::vec3 position = glm::vec3((float)j + 0.25f - 15.0f, (float)k, (float)i + 0.435f - 10.0f);
+					glm::vec3 scale = glm::vec3(0.5f, 0.8f, 0.20f);
+					Object water(&grassModel, position, scale);
+					grassObjects.push_back(water);
+				}
+			}
+		}
+		for (int j = 21; j < (int)WORLD_W - 1; j++)
+		{
+			for (int k = 1; k <= 10; k++)
+			{
+				if (terrainExistence[i][j][k - 1] && !terrainExistence[i][j][k])
+				{
+					glm::vec3 position = glm::vec3((float)j + 0.25f - 15.0f, (float)k, (float)i + 0.435f - 10.0f);
+					glm::vec3 scale = glm::vec3(0.5f, 0.8f, 0.20f);
+					Object water(&grassModel, position, scale);
+					grassObjects.push_back(water);
+				}
 			}
 		}
 	}
-	setupObjects(treeObjects, treeModel);
+	setupObjects(grassObjects, grassModel);
 }
 
 void Scene::setupWaterObjects()
@@ -138,9 +170,9 @@ void Scene::setupWaterObjects()
 	{
 		for (int j = 0; j < WORLD_W; j++)
 		{
-			for (int k = 1; k < 10; k++)
+			for (int k = 1; k <= 10; k++)
 			{
-				glm::vec3 position = glm::vec3((float)j + 0.25f - 15.0f, (float)k + 1.0f, (float)i + 0.35f - 10.0f);
+				glm::vec3 position = glm::vec3((float)j + 0.25f - 15.0f, (float)k, (float)i + 0.435f - 10.0f);
 				glm::vec3 scale = glm::vec3(0.0f, 0.0f, 0.0f);
 				Object water(&waterModel, position, scale);
 				waterObjects.push_back(water);
@@ -150,20 +182,43 @@ void Scene::setupWaterObjects()
 	setupObjects(waterObjects, waterModel);
 }
 
+// Add water at the top
+void Scene::addWater()
+{
+	int flow = 100;
+	for (size_t j = 12; j < 18; j++)
+	{
+		waterLevels[0][j][10] = min(255, waterLevels[0][j][9] + flow);
+	}
+}
+
+// Refresh scales of water blocks to match waterLevels
+void Scene::refreshLevels()
+{
+	int z = 0;
+	for (int i = (int)WORLD_D - 1; i >= 0; i--)
+	{
+		for (int j = 0; j < WORLD_W; j++)
+		{
+			for (int k = 1; k <= 10; k++)
+			{
+				float waterPresent = (waterLevels[i][j][k] > 0) ? 1.0f : 0.0f;
+				waterObjects[z++].scale = glm::vec3(waterPresent, (float)waterLevels[i][j][k] / 255.0f, waterPresent);
+			}
+		}
+	}
+	setupObjects(waterObjects, waterModel);
+}
+
 // Update water levels
 void Scene::updateWaterObjects()
 {
-	float t = (float)glfwGetTime();
 	for (int i = (int)WORLD_D - 1; i >= 0; i--)
 	{
-		for (int k = 1; k <= 10; k++)
+		for (int j = (int)(WORLD_W / 2)- 1; j >= 0; j--)
 		{
-			for (int j = 0; j < WORLD_W; j++)
+			if (!waterLevels[i][j][k] == 0)
 			{
-				if (t - lastWaterUpdateTime < 0.1f)
-				{
-					continue;
-				}
 				if (!terrainExistence[i][j][k - 1])
 				{
 					if (waterLevels[i][j][k - 1] < 255)
@@ -184,52 +239,24 @@ void Scene::updateWaterObjects()
 						waterLevels[i + 1][j][k] += amount;
 					}
 				}
-				int diffL = (j > 0 && !terrainExistence[i][j - 1][k]) ? (waterLevels[i][j][k] - waterLevels[i][j - 1][k]) : 0;
-				int diffR = (j < (int)WORLD_W - 1 && !terrainExistence[i][j + 1][k]) ? (waterLevels[i][j][k] - waterLevels[i][j + 1][k]) : 0;
-				if (diffL > diffR)
+				if (j > 0 && !terrainExistence[i][j - 1][k])
 				{
-					if (j > 0 && !terrainExistence[i][j - 1][k])
+					if (waterLevels[i][j - 1][k] < waterLevels[i][j][k])
 					{
-						if (waterLevels[i][j - 1][k] < waterLevels[i][j][k])
-						{
-							int capacity = 255 - waterLevels[i][j - 1][k];
-							int amount = min(capacity, waterLevels[i][j][k] / 2);
-							waterLevels[i][j][k] -= amount;
-							waterLevels[i][j - 1][k] += amount;
-						}
-					}
-					if (j < (int)WORLD_W - 1 && !terrainExistence[i][j + 1][k])
-					{
-						if (waterLevels[i][j + 1][k] < waterLevels[i][j][k])
-						{
-							int capacity = 255 - waterLevels[i][j + 1][k];
-							int amount = min(capacity, waterLevels[i][j][k] / 2);
-							waterLevels[i][j][k] -= amount;
-							waterLevels[i][j + 1][k] += amount;
-						}
+						int capacity = 255 - waterLevels[i][j - 1][k];
+						int amount = min(capacity, waterLevels[i][j][k] / 2);
+						waterLevels[i][j][k] -= amount;
+						waterLevels[i][j - 1][k] += amount;
 					}
 				}
-				else
+				if (j < (int)WORLD_W - 1 && !terrainExistence[i][j + 1][k])
 				{
-					if (j < (int)WORLD_W - 1 && !terrainExistence[i][j + 1][k])
+					if (waterLevels[i][j + 1][k] < waterLevels[i][j][k])
 					{
-						if (waterLevels[i][j + 1][k] < waterLevels[i][j][k])
-						{
-							int capacity = 255 - waterLevels[i][j + 1][k];
-							int amount = min(capacity, waterLevels[i][j][k] / 2);
-							waterLevels[i][j][k] -= amount;
-							waterLevels[i][j + 1][k] += amount;
-						}
-					}
-					if (j > 0 && !terrainExistence[i][j - 1][k])
-					{
-						if (waterLevels[i][j - 1][k] < waterLevels[i][j][k])
-						{
-							int capacity = 255 - waterLevels[i][j - 1][k];
-							int amount = min(capacity, waterLevels[i][j][k] / 2);
-							waterLevels[i][j][k] -= amount;
-							waterLevels[i][j - 1][k] += amount;
-						}
+						int capacity = 255 - waterLevels[i][j + 1][k];
+						int amount = min(capacity, waterLevels[i][j][k] / 2);
+						waterLevels[i][j][k] -= amount;
+						waterLevels[i][j + 1][k] += amount;
 					}
 				}
 				if (i > 0 && !terrainExistence[i - 1][j][k])
@@ -243,33 +270,60 @@ void Scene::updateWaterObjects()
 					}
 				}
 			}
-		}
-	}
-	int flow = 100;
-	for (size_t i = 12; i < 18; i++)
-	{
-		if (t - lastWaterUpdateTime < 0.1f)
-		{
-			continue;
-		}
-		waterLevels[0][i][9] = min(255, waterLevels[0][i][9] + flow);
-	}
-	int z = 0;
-	for (int i = (int)WORLD_D - 1; i >= 0; i--)
-	{
-		for (int j = 0; j < WORLD_W; j++)
-		{
-			for (int k = 1; k < 10; k++)
+			if (!waterLevels[i][(int)WORLD_W - 1 - j][k] == 0)
 			{
-				float waterPresent = (waterLevels[i][j][k] > 0) ? 1.0f : 0.0f;
-				waterObjects[z++].scale = glm::vec3(waterPresent, (float)waterLevels[i][j][k] / 255.0f, waterPresent);
+				if (!terrainExistence[i][(int)WORLD_W - 1 - j][k - 1])
+				{
+					if (waterLevels[i][(int)WORLD_W - 1 - j][k - 1] < 255)
+					{
+						int capacity = 255 - waterLevels[i][(int)WORLD_W - 1 - j][k - 1];
+						int amount = min(capacity, waterLevels[i][(int)WORLD_W - 1 - j][k]);
+						waterLevels[i][(int)WORLD_W - 1 - j][k] -= amount;
+						waterLevels[i][(int)WORLD_W - 1 - j][k - 1] += amount;
+					}
+				}
+				if (i < (int)WORLD_D - 1 && !terrainExistence[i + 1][(int)WORLD_W - 1 - j][k])
+				{
+					if (waterLevels[i + 1][(int)WORLD_W - 1 - j][k] < waterLevels[i][(int)WORLD_W - 1 - j][k])
+					{
+						int capacity = 255 - waterLevels[i + 1][(int)WORLD_W - 1 - j][k];
+						int amount = min(capacity, waterLevels[i][(int)WORLD_W - 1 - j][k]);
+						waterLevels[i][(int)WORLD_W - 1 - j][k] -= amount;
+						waterLevels[i + 1][(int)WORLD_W - 1 - j][k] += amount;
+					}
+				}
+				if ((int)WORLD_W - 1 - j < (int)WORLD_W - 1 && !terrainExistence[i][(int)WORLD_W - 1 - j + 1][k])
+				{
+					if (waterLevels[i][(int)WORLD_W - 1 - j + 1][k] < waterLevels[i][(int)WORLD_W - 1 - j][k])
+					{
+						int capacity = 255 - waterLevels[i][(int)WORLD_W - 1 - j + 1][k];
+						int amount = min(capacity, waterLevels[i][(int)WORLD_W - 1 - j][k] / 2);
+						waterLevels[i][(int)WORLD_W - 1 - j][k] -= amount;
+						waterLevels[i][(int)WORLD_W - 1 - j + 1][k] += amount;
+					}
+				}
+				if ((int)WORLD_W - 1 - j > 0 && !terrainExistence[i][(int)WORLD_W - 1 - j - 1][k])
+				{
+					if (waterLevels[i][(int)WORLD_W - 1 - j - 1][k] < waterLevels[i][(int)WORLD_W - 1 - j][k])
+					{
+						int capacity = 255 - waterLevels[i][(int)WORLD_W - 1 - j - 1][k];
+						int amount = min(capacity, waterLevels[i][(int)WORLD_W - 1 - j][k] / 2);
+						waterLevels[i][(int)WORLD_W - 1 - j][k] -= amount;
+						waterLevels[i][(int)WORLD_W - 1 - j - 1][k] += amount;
+					}
+				}
+				if (i > 0 && !terrainExistence[i - 1][(int)WORLD_W - 1 - j][k])
+				{
+					if (waterLevels[i - 1][(int)WORLD_W - 1 - j][k] < waterLevels[i][(int)WORLD_W - 1 - j][k])
+					{
+						int capacity = 255 - waterLevels[i - 1][(int)WORLD_W - 1 - j][k];
+						int amount = min(capacity, waterLevels[i][(int)WORLD_W - 1 - j][k] / 2);
+						waterLevels[i][(int)WORLD_W - 1 - j][k] -= amount;
+						waterLevels[i - 1][(int)WORLD_W - 1 - j][k] += amount;
+					}
+				}
 			}
 		}
-	}
-	setupObjects(waterObjects, waterModel);
-	if (t - lastWaterUpdateTime > 0.1f)
-	{
-		lastWaterUpdateTime = (float)glfwGetTime();
 	}
 }
 
@@ -314,7 +368,7 @@ void Scene::drawObjects()
 	float sine = sin(glm::radians(time));
 	float sunX = WORLD_W * sine;
 	float sunY = WORLD_W * cosine;
-	float lightVal = max(0.1f, cosine);
+	float lightVal = max(0.3f, cosine);
 	glm::vec3 lightPos(sunX, sunY, 0.0f);
 
 	// Clear buffers
@@ -334,9 +388,17 @@ void Scene::drawObjects()
 	modelShader.setVec3("lightColor", glm::vec3(lightVal, lightVal, lightVal));
 
 	updateWaterObjects();
+	k++;
+	if (k == 11)
+	{
+		k = 1;
+		addWater();
+		refreshLevels();
+	}
 
 	// Draw objects
 	terrainModel.draw(terrainObjects.size());
-	// treeModel.draw(treeObjects.size());
+	grassModel.draw(grassObjects.size());
 	waterModel.draw(waterObjects.size());
+	treeModel.draw(treeObjects.size());
 }
