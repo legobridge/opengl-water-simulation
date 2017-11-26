@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>Playground | Headers</title>
+        <title>Water Simulation | Headers</title>
         <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
@@ -84,20 +84,20 @@
         <p>Directory of model file</p>
         <h4>|| Member Methods</h4>
         <p class="bold">void draw(unsigned int amount)</p>	
-        <p>Draws an object</p>
+        <p>Draws a number of objects</p>
         <p class="bold">void drawMesh(Mesh mesh, unsigned int amount)</p>	
-        <p>Draws an individual mesh of the object</p>
+        <p>Draws an individual mesh using given arguments</p>
         <h4>|| Private Member Methods</h4>        
         <p class="bold">void loadModel(std::string const &path)</p>	
         <p>Loads model from path</p>
         <p class="bold">void processNode(aiNode *node, const aiScene *scene)</p>
-        <p>Processes nodes</p>
+        <p>Processes a node recursively</p>
         <p class="bold">Mesh processMesh(aiMesh *mesh, const aiScene *scene)</p>
-        <p>Reads model into Mesh structure, creates normals and applies textures</p>
+        <p>Reads model into Mesh structure, stores normals and textures</p>
         <p class="bold">std::vector&ltTexture&gt loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName)</p>
         <p>Loads textures from path</p>
         <p class="bold">unsigned int TextureFromFile(const char *path, const std::string &directory, bool gamma = false)</p>
-        <p>Reads texture from file</p>
+        <p>Loads texture from file</p>
         <br><hr><br>     
 
         <br><h3 id=object>| object.h</h3>
@@ -105,14 +105,14 @@
         <p>Stores properties of an object ot be rendered</p>
         <h4>|| Constructor</h4>
         <p class="bold">Object(Model* baseModel, glm::mat4 model, glm::vec3 position)</p>
-        <p>Inititalises object properties</p>        
+        <p>Initialises object properties</p>        
         <h4>|| Member Fields</h4>
         <p class="bold">Model* baseModel</p>
         <p>Pointer to the model being used</p>
-        <p class="bold">glm::mat4 model</p>
-        <p>Loacl to global space tranformation matrix</p>
         <p class="bold">glm::vec3 position</p>
-        <p>Position of the object</p>        
+        <p>Global position of the object</p>        
+        <p class="bold">glm::vec3 scale</p>
+        <p>Scaling parameters of the object</p>
         <br><hr><br>        
 
         <br><h3 id=scene>| scene.h</h3>
@@ -137,6 +137,8 @@
         <p>Timescale measure for day-night cycle</p>
         <p class="bold">bool paused</p>
         <p>Time pause state</p>
+        <p class="bold">int k</p>
+        <p>Current height of water</p>
         <p class="bold">Camera camera</p>
         <p>Camera object</p>
         <p class="bold">Shader modelShader</p>
@@ -145,19 +147,41 @@
         <p>An instance of Model for terrain</p>
         <p class="bold">Model treeModel</p>
         <p>An instance of Model for trees</p>
+        <p class="bold">Model grassModel</p>
+        <p>An instance of Model for grass</p>
+        <p class="bold">Model waterModel</p>
+        <p>An instance of Model for water</p>
         <p class="bold">std::vector&ltObject&gt terrainObjects</p>
         <p>Vector of Objects for terrain</p>
         <p class="bold">std::vector&ltObject&gt treeObjects</p>
         <p>Vector of objects for trees</p>
-        <p class="bold">std::vector&ltstd::vector&ltbool&gt &gt occupied</p>
-        <p>Stores occupied/vacant status of each unit volume</p>
+        <p class="bold">std::vector&ltObject&gt grassObjects</p>
+        <p>Vector of objects for grass</p>
+        <p class="bold">std::vector&ltObject&gt waterObjects</p>
+        <p>Vector of objects for water blocks</p>
+        <p class="bold">std::vector&ltstd::vector&ltstd::vector&ltbool&gt &gt &gt terrainExistence</p>
+        <p>Stores terrain status of each volume unit</p>
+        <p class="bold">std::vector&ltstd::vector&ltstd::vector&int&gt &gt &gt waterLevels</p>
+        <p>Stores water level of each volume unit</p>
         <h4>|| Member Methods</h4>
         <p class="bold">void Scene::setupObjects(std::vector&ltObject&gt objects, Model model)</p>
         <p>Generic setup function for objects</p>
+        <p class="bold">void setupTerrainHeights()</p>
+        <p>Reads height-map and initialises <b>terrainExistence</b></p>
         <p class="bold">void setupTerrainObject()</p>
-        <p>Sets up the terrain object</p>
+        <p>Sets up the terrain object for instantiation</p>
         <p class="bold">void setupTreeObjects()</p>
-        <p>Sets up tree objects</p>
+        <p>Sets up tree objects for instantiation</p>
+        <p class="bold">void setupGrassObjects()</p>
+        <p>Sets up grass objects for instantiation</p>
+        <p class="bold">void setupWaterObjects()</p>
+        <p>Sets up water blocks for instantiation</p>
+        <p class="bold">void addWater()</p>
+        <p>Adds water at the top</p>
+        <p class="bold">void refreshLevels()</p>
+        <p>Refreshes scaling of water to match water levels</p>
+        <p class="bold">void updateWaterObjects()</p>
+        <p>Updates water levels</p>
         <p class="bold">void toggleTime()</p>
         <p>Toggle time</p>
         <p class="bold">void slowDownTime()</p>
