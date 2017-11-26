@@ -12,14 +12,14 @@ public:
 	// Pointer to the entity of which the object is an instance
 	Model* baseModel;
 
-	// Local space to world space transformation matrix
-	glm::mat4 model;
-
 	// Global position of the object
 	glm::vec3 position;
 
+	// Scaling parameter of the object
+	glm::vec3 scale;
+
 	// Constructor
-	Object(Model* baseModel, glm::mat4 model, glm::vec3 position);
+	Object(Model* baseModel, glm::vec3 position, glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f));
 };
 
 #endif

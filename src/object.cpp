@@ -3,9 +3,9 @@
 using namespace std;
 
 // Constructor
-Object::Object(Model* baseModel, glm::mat4 model, glm::vec3 position)
+Object::Object(Model* baseModel, glm::vec3 position, glm::vec3 scale)
 {
 	this->baseModel = baseModel;
-	this->model = model;
 	this->position = position;
+	this->scale = scale;
 }

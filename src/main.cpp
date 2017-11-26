@@ -143,8 +143,8 @@ bool initializeOpenGL()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	// Window (default: 768p fullscreen) and context creation
-	window = glfwCreateWindow(SCR_W, SCR_H, WINDOW_TITLE, glfwGetPrimaryMonitor(), NULL);
+	// Window (default: 768p fullscreen) and context creationglfwGetPrimaryMonitor()
+	window = glfwCreateWindow(SCR_W, SCR_H, WINDOW_TITLE, NULL, NULL);
 	if (!window)
 	{
 		cout << "Window or context creation failed" << endl;

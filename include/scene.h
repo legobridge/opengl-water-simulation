@@ -2,6 +2,7 @@
 #define SCENE_H
 
 #include <vector>
+#include <fstream>
 #include <map>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -25,25 +26,31 @@ public:
 	const float WORLD_D = 20.0f;
 
 	// In-Program timekeeping variables
-	float time; 
+	float time;
 	float prevTime;
 	float timescale;
 
 	// Time pause state
 	bool paused;
 
+	// Time when water levels were last updated
+	float lastWaterUpdateTime;
+
 	Camera camera;
 
 	Shader modelShader;
 
 	Model terrainModel;
+	Model waterModel;
 	Model treeModel;
 
 
 	std::vector<Object> terrainObjects;
 	std::vector<Object> treeObjects;
+	std::vector<Object> waterObjects;
 
-	std::vector<std::vector<bool> > occupied;
+	std::vector<std::vector<std::vector<bool> > > terrainExistence;
+	std::vector<std::vector<std::vector<int> > > waterLevels;
 
 	// Constructor
 	Scene();
@@ -51,11 +58,20 @@ public:
 	// Generic setup function
 	void Scene::setupObjects(std::vector<Object> objects, Model model);
 
+	// Read in the heightmap and setup terrain heights
+	void setupTerrainHeights();
+
 	// Prepare terrain object for instantiation
 	void setupTerrainObject();
 
 	// Prepare tree objects for instantiation
 	void setupTreeObjects();
+
+	// Prepare water blocks for instantiation
+	void setupWaterObjects();
+
+	// Update water levels
+	void updateWaterObjects();
 
 	// Toggle time (on/off)
 	void toggleTime();
