@@ -2,6 +2,7 @@
 
 using namespace std;
 
+// Constructor
 Model::Model(string const &path, Shader s, bool gamma)
 	: shader(s)
 	, gammaCorrection(gamma)
@@ -9,6 +10,7 @@ Model::Model(string const &path, Shader s, bool gamma)
 	loadModel(path);
 }
 
+// Load model from file
 void Model::loadModel(string const &path)
 {
 	Assimp::Importer importer;
@@ -24,6 +26,7 @@ void Model::loadModel(string const &path)
 	processNode(scene->mRootNode, scene);
 }
 
+// Process a node recursively
 void Model::processNode(aiNode *node, const aiScene *scene)
 {
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
@@ -37,6 +40,7 @@ void Model::processNode(aiNode *node, const aiScene *scene)
 	}
 }
 
+// Process mesh and organize into data structures
 Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 {
 	vector<Vertex> vertices;
@@ -96,6 +100,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 	return Mesh(vertices, indices, textures);
 }
 
+// Load textures for the model
 vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName)
 {
 	vector<Texture> textures;
@@ -127,6 +132,7 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type,
 	return textures;
 }
 
+// Load textures from file
 unsigned int Model::TextureFromFile(const char *path, const string &directory, bool gamma)
 {
 	string filename = string(path);
@@ -167,6 +173,7 @@ unsigned int Model::TextureFromFile(const char *path, const string &directory, b
 	return textureID;
 }
 
+// Draw a set number of objects
 void Model::draw(unsigned int amount)
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
@@ -175,6 +182,7 @@ void Model::draw(unsigned int amount)
 	}
 }
 
+// Draw the mesh with given arguments
 void Model::drawMesh(Mesh mesh, unsigned int amount)
 {
 	vector<Vertex> vertices = mesh.vertices;

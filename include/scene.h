@@ -36,31 +36,36 @@ public:
 	// Current height of water level to be computed
 	int k;
 
+	// Camera object
 	Camera camera;
 
+	// Shader object for models
 	Shader modelShader;
 
+	// Models
 	Model terrainModel;
-	Model waterModel;
 	Model treeModel;
 	Model grassModel;
+	Model waterModel;
 
+	// Object lists of various model types
 	std::vector<Object> terrainObjects;
 	std::vector<Object> treeObjects;
-	std::vector<Object> waterObjects;
 	std::vector<Object> grassObjects;
+	std::vector<Object> waterObjects;
 
+	// Voxel mapping data structures
 	std::vector<std::vector<std::vector<bool> > > terrainExistence;
 	std::vector<std::vector<std::vector<int> > > waterLevels;
 
 	// Constructor
 	Scene();
 
-	// Generic setup function
-	void setupObjects(std::vector<Object> objects, Model model);
-
 	// Read in the heightmap and setup terrain heights
 	void setupTerrainHeights();
+
+	// Generic setup function
+	void setupObjects(std::vector<Object> objects, Model model);
 
 	// Prepare terrain object for instantiation
 	void setupTerrainObject();

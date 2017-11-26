@@ -30,22 +30,30 @@ public:
 	Shader shader;
     bool gammaCorrection;
 
+	// Constructor
 	Model(std::string const &path, Shader s, bool gamma = false);
 
+	// Draw a set number of objects
 	void draw(unsigned int amount);
 
+	// Draw the mesh with given arguments
 	void drawMesh(Mesh mesh, unsigned int amount);
    
 private:
 
+	// Load model from file
 	void loadModel(std::string const &path);
 
+	// Process a node recursively
 	void processNode(aiNode *node, const aiScene *scene);
 
+	// Process mesh and organize into data structures
 	Mesh processMesh(aiMesh *mesh, const aiScene *scene);
 
+	// Load textures for the model
 	std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
 
+	// Load textures from file
 	unsigned int TextureFromFile(const char *path, const std::string &directory, bool gamma = false);
 };
 

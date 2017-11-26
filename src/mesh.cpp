@@ -2,6 +2,7 @@
 
 using namespace std;
 
+// Constructor
 Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
 {
 	this->vertices = vertices;
@@ -10,6 +11,7 @@ Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture
 	setupMesh();
 }
 
+// Setup function
 void Mesh::setupMesh()
 {
 	glGenVertexArrays(1, &VAO);

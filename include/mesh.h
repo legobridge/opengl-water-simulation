@@ -35,17 +35,20 @@ class Mesh
 {
 public:
 
+	// Mesh parameters
 	unsigned int VAO;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<Texture> textures;
 
+	// Constructor
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 
 private:
 
 	unsigned int VBO, EBO;
 
+	// Setup function
 	void setupMesh();
 };
 #endif
