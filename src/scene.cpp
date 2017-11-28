@@ -425,7 +425,7 @@ void Scene::drawObjects()
 	glm::vec3 lightPos(sunX, sunY, 0.0f);
 
 	// Clear buffers
-	glClearColor(lightVal, lightVal, lightVal, 1.0f);
+	glClearColor(lightVal * 140.0f / 255.0f, lightVal * 180.0f / 255.0f, lightVal * 220.0f / 255.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Setup shader
@@ -442,7 +442,7 @@ void Scene::drawObjects()
 
 	updateWaterObjects();
 	k++;
-	if (k == 11)
+	if (k == (int)WORLD_H - 5)
 	{
 		k = 1;
 		addWater();
